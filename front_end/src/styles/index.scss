@@ -1,0 +1,58 @@
+@import "./variables.scss";
+@import "./mixin.scss";
+page {
+  height:100%;
+  background: $pageBg;
+  //margin-top: 160rpx;
+}
+
+.gray-icon {
+  color: $iconColor;
+}
+.white-icon {
+  color: $white;
+}
+.blue-icon {
+  color: $light-blue;
+}
+.gray-blue-icon {
+  color: $gray-blue;
+}
+
+.placeholder-color {
+  color: $placeholderColor;
+}
+
+.btn-hover {
+  opacity: 0.7;
+}
+
+button::after {
+  border: 0;
+}
+
+.choose-hover {
+  background-color: rgba(240, 240, 240, 0.5);
+  opacity: 0.7;
+}
+
+.tab-hover {
+  background-color: rgba(240, 240, 240, 0.5);
+  opacity: 0.7;
+}
+
+/* 单独页面的自定义 */
+#index, #list {
+  .bottom-block {
+    @include height-width-percent-text-center(89, 98%);
+    margin-left: 1%;
+    font-size: 34rpx;
+    color: $light-blue;
+    @include border-top-width(1);
+    @include border-radius-bottom(10);
+    background: $white;
+  }
+  .block {
+    @include height-rpx-width-100(50)
+  }
+}
