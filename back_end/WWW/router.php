@@ -52,8 +52,8 @@ class WXBizDataCrypt
 }
 
 $config = [
-    'appid' => 'wxe378c1ebc7aeeff6',
-    'secret' => 'e6daee5b266424478eaa9dc3129ae51c'
+    'appid' => 'xxx',
+    'secret' => 'xxx'
 ];
 
 function getWechatSession($code, $appid, $secret)
