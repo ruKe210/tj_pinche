@@ -1,3 +1,3 @@
 ## 同济拼车小程序
 
-替换src和WWW文件
+替换src\static和WWW文件
