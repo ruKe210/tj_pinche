@@ -19,8 +19,8 @@ const app = {
       list: 10
     },
     shareImg: {
-      index: 'http://localhost:90/e2.jpg',
-      detail: 'http://localhost:90/e2.jpg'
+      index: 'http://localhost:90/bg-detail.jpg',
+      detail: 'http://localhost:90/bg-detail.jpg'
     },
     shareText: {
       index: '推荐同济拼车，快来试试~',

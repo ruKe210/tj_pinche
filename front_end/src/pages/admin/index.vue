@@ -127,6 +127,7 @@
       },
       getConfig () {
         getConfig().then(res => {
+          console.log(res)
           this.switches.add = !!parseInt(res.data.SWITCH.SwitchAdd)
           this.switches.callPhone = !!parseInt(res.data.SWITCH.SwitchCallPhone)
           this.pageSize.index = parseInt(res.data.PAGE_SIZE.PageSizeIndex)

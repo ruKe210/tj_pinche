@@ -38,7 +38,7 @@
         </view>
         <view class="right">
           <view class="summary">
-            <view class="price" v-if="travel.price !== '-1'">
+            <view class="price" v-if="travel.price !== '-1.00'">
               <text class="money">{{ travel.price }}</text>
               <text class="unit">/人</text>
             </view>
@@ -106,8 +106,11 @@
       },
       chooseShare (item) {
         this.tempTravel = item
-        this.$refs.actionSheet.showActionSheet()
-        this.$refs.shareImgCom.createShareImg(item, false)
+        // this.$refs.actionSheet.showActionSheet()
+        // this.$refs.shareImgCom.createShareImg(item, false)
+        wx.navigateTo({
+          url: `../share/main?tid=${this.tempTravel.id}`
+        })
       },
       getShareImgUrl (url) {
         this.$emit('shareImgUrl', { url, tid: this.tempTravel.id })

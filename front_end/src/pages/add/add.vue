@@ -201,7 +201,6 @@
               :loading="loading"
               :disabled="!switches.add"
               open-type="getUserInfo"
-              @getuserinfo="showUserInfo"
               hover-class="btn-hover">发布行程</button>
 
       <!-- <button v-if="canIUseGetUserProfile" class="release-button" hover-class="btn-hover" :loading="loading" @click="getUserProfile">立即登录</button>
@@ -314,10 +313,13 @@
       let dates = getDay(30)
       dates.splice(0, 0, '无返程')
       this.retDays = dates
-      this.day = this.days[this.dayVal[0]]
+      this.day = this.days[this.dayVal[0]+1]
       this.time = this.times[this.timeVal[0]]
       this.minute = this.minutes[this.timeVal[1]]
-      this.service.time = `${this.day} ${this.time}:${this.minute}`
+      this.service.time = `${this.day + 1} ${this.time}:${this.minute}`
+
+      this.service.phone = this.$store.getters.mobileNo
+
       this.service.number = this.nums[this.numVal[0]]
       this.service.price = this.pays[this.payVal[0]]
       this.priceDisabled = this.pays[this.payVal[0]] === '面议'
@@ -325,6 +327,7 @@
       this.retTime = this.times[this.retTimeVal[0]]
       this.retMinute = this.minutes[this.retTimeVal[1]]
       this.service.returnTime = this.retDay === '无返程' ? '无返程' : `${this.retDay} ${this.retTime}:${this.retMinute}`
+      console.log('service',this.service)
     },
     onUnload () {
       // TODO 保存本地
@@ -337,6 +340,7 @@
       const clientWidth = res.windowWidth
       const rpxR = 750 / clientWidth
       this.addHeight = clientHeight * rpxR + 160 + 60
+      this.service.phone = this.$store.getters.mobileNo
     },
     watch: {
       dayVal (val) {
@@ -683,22 +687,22 @@
       },
       retTimeChange (e) {
         this.retTimeVal = e.mp.detail.value
-      },
-      showUserInfo (info) {
-        if (this.nickName) {
-          this.addDistance()
-        } else {
-          if (info.mp.detail.errMsg.indexOf('ok') !== -1) {
-            this.$store.dispatch('AddUser', info.mp.detail.userInfo).then(() => {
-              this.addDistance()
-            }).catch(error => {
-              console.log(error)
-            })
-          } else {
-            errorToast('您拒绝了，无法发布行程！')
-          }
-        }
       }
+      // showUserInfo (info) {
+      //   if (this.nickName) {
+      //     this.addDistance()
+      //   } else {
+      //     if (info.mp.detail.errMsg.indexOf('ok') !== -1) {
+      //       this.$store.dispatch('AddUser', info.mp.detail.userInfo).then(() => {
+      //         this.addDistance()
+      //       }).catch(error => {
+      //         console.log(error)
+      //       })
+      //     } else {
+      //       errorToast('您拒绝了，无法发布行程！')
+      //     }
+      //   }
+      // }
     },
     computed: {
       ...mapGetters([

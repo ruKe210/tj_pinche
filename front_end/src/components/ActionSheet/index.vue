@@ -6,7 +6,6 @@
       <cover-view class="sheets">
         <button class="sheet cancel" @click="chooseActionSheet" hover-class="btn-hover">取消</button>
         <button class="sheet" open-type="share" hover-class="btn-hover">分享给微信好友</button>
-        <button class="sheet" hover-class="btn-hover" @click="shareActionSheet">生成分享图</button>
       </cover-view>
     </cover-view>
   </cover-view>

@@ -11,7 +11,7 @@
          show-location
     ></map>
     <view class="nav">
-      <view class="left">{{ travel.type === 2 ? '车找人' : '人找车'}}</view>
+      <view class="left">{{ travel.type === '2' ? '车找人' : '人找车'}}</view>
       <view class="switch" @click="mapSwitch">
         <view class="slider"></view>
       </view>
@@ -40,13 +40,13 @@
           <view class="left">
             <view class="seats" v-if="travel.type === 1">{{ travel.num }}人乘车</view>
             <view class="seats" v-else>剩余{{ travel.num }}座</view>
-            <view class="price" v-if="travel.price !== '-1'">&yen{{ travel.price }}/人</view>
+            <view class="price" v-if="travel.price !== '-1.00'">&yen{{ travel.price }}/人</view>
             <view class="price" v-else>价格面议</view>
           </view>
-          <view class="right" hover-class="btn-hover">
+          <!-- <view class="right" hover-class="btn-hover">
             <view class="return" v-if="travel.returnId !== ''" @click="returnDetail(travel.returnId)">原</view>
             <view class="return" v-else-if="travel.initialId !== ''" @click="travelDetail(travel.initialId)">返</view>
-          </view>
+          </view> -->
         </view>
         <view class="travel">
           <view class="detail">
@@ -173,7 +173,10 @@
         this.getDetail(travelId, false)
       },
       share () {
-        this.$refs.actionSheet.showActionSheet()
+        // 直接跳转到分享页，并传递当前行程id
+        wx.navigateTo({
+          url: `../share/main?tid=${this.travel.id}`
+        })
       },
       createShareImg (showImg) {
         if (showImg) {
@@ -192,10 +195,12 @@
         wx.showLoading({
           title: '加载中...'
         })
+        // console.log('getDetail')
         getTravel(id).then(res => {
           wx.hideLoading()
           let travel = null
           this.travel = travel = res.data
+          console.log('travel', travel)
           this.travel.time = formatDateTime(travel.time)
           this.markers = []
           this.markers.push(
@@ -224,7 +229,9 @@
           )
           this.createShareImg(false)
           if (loadUser) {
-            this.getUser(travel.uid)
+            console.log('travel', travel)
+            console.log('uid', travel.mobileNo)
+            this.getUser(travel.mobileNo)
           }
           this.direction(travel)
         })
@@ -376,6 +383,7 @@
           padding-left: 15rpx;
           font-size: 32rpx;
           @include over-hidden;
+          margin-top: var(--nickname-offset, 15rpx); // 默认0，可自定义
         }
       }
       .contact {

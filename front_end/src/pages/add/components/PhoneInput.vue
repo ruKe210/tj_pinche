@@ -40,6 +40,8 @@
     onLoad () {
       Object.assign(this.$data, this.$options.data())
       this.phone = this.mobileNo
+      const userInfo = wx.getStorageSync('user_info')
+      this.phone = userInfo.phone
     },
     onUnload () {
       Object.assign(this.$data, this.$options.data())

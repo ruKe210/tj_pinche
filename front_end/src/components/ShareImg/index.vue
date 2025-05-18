@@ -60,6 +60,7 @@
       drawImg (type, origin, dest, time, mobileNo, qrCode) {
         const self = this
         let bg = new Promise((resolve, reject) => {
+          console.log('imageinfo', self.shareImg.detail)
           wx.getImageInfo({
             src: self.shareImg.detail,
             success (res) {

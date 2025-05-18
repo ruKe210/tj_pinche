@@ -19,7 +19,6 @@
 <script>
   import { mapGetters } from 'vuex'
   import { getTravel } from '@/api/api'
-  import { fileUrl } from '@/utils/config'
   import { formatDateTime } from '@/utils/index'
   export default {
     data () {
@@ -35,14 +34,14 @@
         wx.showLoading({
           title: '加载中...'
         })
-        this.drawImg(val.type, val.origin, val.dest, val.time, val.qrCode).then(() => {
+        this.drawImg(val.type, val.origin, val.dest, val.time, val.mobileNo).then(() => {
           setTimeout(() => {
             this.createImg()
             wx.hideLoading()
           }, 500)
         })
       },
-      drawImg (type, origin, dest, time, qrCode) {
+      drawImg (type, origin, dest, time, mobileNo) {
         const self = this
         let bg = new Promise((resolve, reject) => {
           wx.getImageInfo({
@@ -56,22 +55,9 @@
             }
           })
         })
-        let qr = new Promise((resolve, reject) => {
-          wx.getImageInfo({
-            src: `${fileUrl}${qrCode}`,
-            success (res) {
-              resolve(res)
-            },
-            fail (error) {
-              wx.hideLoading()
-              console.log('--------->qr')
-              console.error(error)
-            }
-          })
-        })
         return new Promise((resolve, reject) => {
           try {
-            Promise.all([bg, qr]).then(res => {
+            Promise.all([bg]).then(res => {
               const ctx = wx.createCanvasContext('shareImg')
               // 上部 view
               // ctx.setFillStyle('#F8FCFF')
@@ -107,27 +93,28 @@
               ctx.setTextAlign('right')
               ctx.setFillStyle('#26548D')
               ctx.setFontSize(26)
-              ctx.fillText('起点：', self.canvasWidthPx * 0.26, 140)
-              ctx.fillText('终点：', self.canvasWidthPx * 0.26, 180)
-              ctx.fillText('时间：', self.canvasWidthPx * 0.26, 220)
+              ctx.fillText('起点：', self.canvasWidthPx * 0.26, 130)
+              ctx.fillText('终点：', self.canvasWidthPx * 0.26, 170)
+              ctx.fillText('时间：', self.canvasWidthPx * 0.26, 210)
+              ctx.fillText('电话：', self.canvasWidthPx * 0.26, 250) // 新增
 
               ctx.beginPath()
               ctx.setTextAlign('left')
               ctx.setFillStyle('#0A1519')
               ctx.setFontSize(26)
-              ctx.fillText(origin, self.canvasWidthPx * 0.26, 140)
-              ctx.fillText(dest, self.canvasWidthPx * 0.26, 180)
-              ctx.fillText(formatDateTime(time), self.canvasWidthPx * 0.26, 220)
+              ctx.fillText(origin, self.canvasWidthPx * 0.26, 130)
+              ctx.fillText(dest, self.canvasWidthPx * 0.26, 170)
+              ctx.fillText(formatDateTime(time), self.canvasWidthPx * 0.26, 210)
+              ctx.fillText(mobileNo, self.canvasWidthPx * 0.26, 250) // 新增
               // 底部信息
               ctx.beginPath()
               ctx.setTextAlign('left')
               ctx.setFillStyle('#ACACAC')
               ctx.setFontSize(24)
-              ctx.fillText('长按识别小程序码，联系TA', self.canvasWidthPx * 0.04, 325)
-              ctx.fillText('分享来自「成武拼车」', self.canvasWidthPx * 0.04, 360)
+              ctx.fillText('分享来自「同济拼车」', self.canvasWidthPx * 0.04, 360)
 
               // 小程序码
-              ctx.drawImage(res[1].path, self.canvasWidthPx - 110, 295, 100, 100)
+              // ctx.drawImage(res[1].path, self.canvasWidthPx - 110, 295, 100, 100)
               ctx.draw()
               resolve()
             })

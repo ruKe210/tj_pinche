@@ -157,7 +157,9 @@
       getList () {
         list(this.service, this.page, this.pageSize.index).then(res => {
           this.list = res.data.list.map(item => {
+            console.log('item', item)
             item['distTime'] = formatTime(item.time)
+            console.log('distTime', item.distTime)
             item.time = formatDateTime(item.time)
             return item
           })
@@ -289,6 +291,7 @@
       this.initFrom()
       list(this.service, this.page).then(res => {
         this.list = res.data.list.map(item => {
+          console.log('item', item)
           item['distTime'] = formatTime(item.time)
           item.time = formatDateTime(item.time)
           return item

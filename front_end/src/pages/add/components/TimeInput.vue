@@ -116,12 +116,15 @@
       }
       this.time = this.times[this.timeVal[0]]
       this.minute = this.minutes[this.timeVal[1]]
-      this.day = this.days[this.dayVal[0]]
+      console.log(this.days)
+      console.log(this.dayVal)
+      this.day = this.days[this.dayVal[0] + 1]
+      console.log(this.day)
       this.dateTime = this.day === '无返程' ? '无返程' : `${this.day} ${this.time}:${this.minute}`
     },
     watch: {
       dayVal (val) {
-        this.day = this.days[val[0]]
+        this.day = this.days[val[0] + 1]
         this.dateTime = this.day === '无返程' ? '无返程' : `${this.day} ${this.time}:${this.minute}`
         this.emitTime()
       },

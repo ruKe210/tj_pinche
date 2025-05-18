@@ -24,7 +24,7 @@
 
           <price-input type="price" :validate="formValidate.price" :showPicker="showPicker.price" @input="hidePicker" @choose="choosePrice" @price="getPrice"/>
 
-          <phone-input type="phone" :validate="formValidate.phone" @input="hidePicker" @phone="getPhone"/>
+          <phone-input type="phone" :validate="formValidate.phone" :value="service.phone" @input="hidePicker" @phone="getPhone"/>
 
         </view>
 
@@ -71,7 +71,7 @@
   import PhoneInput from './components/PhoneInput'
   import ViaInput from './components/ViaInput'
   import { add } from '@/api/api'
-  import { parseDate, successToast, errorToast } from '@/utils/index'
+  import { parseDate, errorToast } from '@/utils/index'
   import { isInteger, isMoney, isAfterNow, isMobile } from '@/utils/validate'
   export default {
     data () {
@@ -128,12 +128,16 @@
           time: false,
           retTime: false,
           number: false,
-          price: false
+          price: false,
+          phone: false
         }
       }
     },
     onLoad () {
       Object.assign(this.$data, this.$options.data())
+      const userInfo = wx.getStorageSync('user_info')
+      this.service.phone = userInfo.phone
+      console.log('this.service.phone', this.service.phone)
     },
     onUnload () {
       Object.assign(this.$data, this.$options.data())
@@ -264,14 +268,20 @@
           remarks: this.moreSwitchNo ? this.service.remarks : ''
         }
         this.loading = false
-
+        console.log('travel', travel)
         add(travel).then(res => {
           this.loading = false
+          console.log('res', res)
           if (res.meta.code === 2000) {
-            successToast('添加成功')
+            wx.showToast({
+              title: '已添加行程',
+              icon: 'success',
+              duration: 1500
+            })
             setTimeout(() => {
-              const url = '../index/main'
-              wx.redirectTo({ url })
+              wx.redirectTo({
+                url: '../index/main'
+              })
             }, 1500)
           } else {
             errorToast(res.meta.msg)
@@ -290,19 +300,20 @@
         this.hidePicker()
       },
       showUserInfo (info) {
-        if (this.nickName) {
-          this.addDistance()
-        } else {
-          if (info.mp.detail.errMsg.indexOf('ok') !== -1) {
-            this.$store.dispatch('AddUser', info.mp.detail.userInfo).then(() => {
-              this.addDistance()
-            }).catch(error => {
-              console.log(error)
-            })
-          } else {
-            errorToast('您拒绝了，无法发布行程！')
-          }
-        }
+        this.addDistance()
+        // if (this.nickName) {
+        //   this.addDistance()
+        // } else {
+        //   if (info.mp.detail.errMsg.indexOf('ok') !== -1) {
+        //     this.$store.dispatch('AddUser', info.mp.detail.userInfo).then(() => {
+        //       this.addDistance()
+        //     }).catch(error => {
+        //       console.log(error)
+        //     })
+        //   } else {
+        //     errorToast('您拒绝了，无法发布行程！')
+        //   }
+        // }
       },
       hidePicker (key) {
         if (key === 'time') {

@@ -4,10 +4,11 @@ export function formatNumber (val) {
 }
 
 export function formatTime (time) {
-  const date = time
+  const date =  new Date(time).getTime()
   const now = Date.now()
+  console.log('now', now)
   const diff = (date - now) / 1000
-
+  console.log('diff', diff)
   if (diff > 3600 * 24) {
     return parseInt(Math.ceil(diff / (60 * 60 * 24))) + '天后出发'
   } else if (diff > 3600) {

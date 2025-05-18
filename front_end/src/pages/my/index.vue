@@ -103,8 +103,8 @@
         const url = '../admin/main'
         wx.navigateTo({ url })
       },
-      getReleaseCount () {
-        getReleaseCount().then(res => {
+      getReleaseCount (phone) {
+        getReleaseCount(phone).then(res => {
           console.log(res)
           if (res.meta.code === 2000) {
             this.releaseCount = res.data
@@ -136,10 +136,11 @@
         this.userInfo = userInfo
         console.log('当前用户信息:', userInfo)
       }
+      this.getReleaseCount(this.userInfo.phone)
     },
     onLoad () {
       // Object.assign(this.$data, this.$options.data())
-      this.getReleaseCount()
+      // this.getReleaseCount()
       // const userInfo = wx.getStorageSync('user_info')
       // this.userInfo = userInfo
       // console.log('当前用户信息:', userInfo)

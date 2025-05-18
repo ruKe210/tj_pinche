@@ -1,8 +1,8 @@
 <template>
   <view class="login-container">
     <view class="logo-container">
-      <image src="/static/logo.png" mode="aspectFit" class="logo-image"></image>
-      <text class="app-name">我的应用</text>
+      <!-- <image src="/static/logo.png" mode="aspectFit" class="logo-image"></image> -->
+      <text class="app-name">同济拼车</text>
     </view>
     
     <view class="form-container">

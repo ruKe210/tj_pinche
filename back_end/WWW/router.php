@@ -52,8 +52,8 @@ class WXBizDataCrypt
 }
 
 $config = [
-    'appid' => 'xxx',
-    'secret' => 'xxx'
+    'appid' => 'wxe378c1ebc7aeeff6',
+    'secret' => 'e6daee5b266424478eaa9dc3129ae51c'
 ];
 
 function getWechatSession($code, $appid, $secret)
@@ -121,7 +121,7 @@ if (strpos($requestUri, '/mp/config') !== false) {
                 ],
                 "SHARE_IMG" => [
                     "ShareImgIndex" => "http://localhost:90/e2.jpg",
-                    "ShareImgDetail" => "http://localhost:90/e2.jpg"
+                    "ShareImgDetail" => "http://localhost:90/bg-detail.jpg"
                 ],
                 "SHARE_TEXT" => [
                     "ShareTextIndex" => "推荐同济拼车，快来试试~",
@@ -199,21 +199,159 @@ else if (strpos($requestUri, '/mp/user/auth') !== false) {
         ]);
     }
 }
+else if (preg_match('/\/mp\/user\/(\d{11})/', $requestUri, $matches)) {
+    $phone = $matches[1];
 
+    // 查询用户信息
+    $stmt = $conn->prepare("SELECT id, avatar_url, nickname, gender, phone FROM users WHERE phone = ?");
+    $stmt->bind_param("s", $phone);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($row = $result->fetch_assoc()) {
+        $response = [
+            'status' => 'success',
+            'message' => '获取用户信息成功',
+            'data' => [
+                'userId'    => $row['id'],
+                'avatarUrl' => $row['avatar_url'],
+                'nickName'  => $row['nickname'],
+                'gender'    => $row['gender'],
+                'phone'     => $row['phone']
+            ],
+            'meta' => [
+                'code' => 2000
+            ]
+        ];
+    } else {
+        http_response_code(404);
+        $response = [
+            'status' => 'error',
+            'message' => '未找到该手机号的用户'
+        ];
+    }
+
+    header('Content-Type: application/json');
+    echo json_encode($response);
+    exit;
+}
 
 else if (strpos($requestUri, '/mp/user/release/count') !== false) {
-    // 模拟返回发布的行程数量
+    // 获取POST数据
+    header('Content-Type: application/json; charset=utf-8');
+
+    // 支持 GET 和 POST 两种方式获取 phone
+    $phone = '';
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $postData = json_decode(file_get_contents('php://input'), true);
+        $phone = $postData['phone'] ?? '';
+    } else if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+        $phone = $_GET['phone'] ?? '';
+    }
+
+    if (empty($phone)) {
+        http_response_code(400);
+        echo json_encode([
+            'status' => 'error',
+            'message' => '缺少手机号参数',
+            'postData' => null
+        ]);
+        exit;
+    }
+
+    // 查询travels表统计该手机号的发布数量
+    $stmt = $conn->prepare("SELECT COUNT(*) as count FROM travels WHERE mobile_no = ?");
+    $stmt->bind_param("s", $phone);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $count = 0;
+    if ($row = $result->fetch_assoc()) {
+        $count = intval($row['count']);
+    }
+
     $response = [
         'status' => 'success',
         'message' => '获取发布数量成功',
-        'data' => 5,
+        'data' => $count,
         'meta' => [
             'code' => 2000
         ]
     ];
 
-    // 设置响应头为 JSON 格式
     header('Content-Type: application/json');
+    echo json_encode($response);
+    exit;
+}
+else if (strpos($requestUri, '/mp/user/release') !== false) {
+    header('Content-Type: application/json; charset=utf-8');
+
+    // 获取查询参数
+    $time = $_GET['time'] ?? '';
+    $type = $_GET['type'] ?? '';
+    $page = intval($_GET['page'] ?? 1);
+    $count = intval($_GET['count'] ?? 10);
+    $offset = ($page - 1) * $count;
+
+    // 构建SQL条件
+    $whereArr = [];
+    if ($type == '1') {
+        // $whereArr[] = "type = " . intval($type);
+    
+        if ($time !== '') {
+            // 假设time是时间戳（毫秒），转为Y-m-d H:i:s
+            $date = date('Y-m-d H:i:s', intval($time) / 1000);
+            $whereArr[] = "time >= '$date'";
+        }
+    }
+    else
+    {
+        if ($time !== '') {
+            // 假设time是时间戳（毫秒），转为Y-m-d H:i:s
+            $date = date('Y-m-d H:i:s', intval($time) / 1000);
+            $whereArr[] = "time < '$date'";
+        }
+    }
+    $whereSql = count($whereArr) > 0 ? 'WHERE ' . implode(' AND ', $whereArr) : '';
+
+    // 查询数据
+    $sql = "SELECT * FROM travels $whereSql ";
+    $result = $conn->query($sql);
+
+    $list = [];
+    if ($result && $result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $list[] = [
+                'id' => $row['id'],
+                'type' => $row['type'],
+                'origin' => $row['origin'],
+                'dest' => $row['dest'],
+                'time' => $row['time'],
+                'num' => $row['num'],
+                'price' => $row['price'],
+                'mobileNo' => $row['mobile_no'],
+                'remarks' => $row['remarks']
+            ];
+        }
+    }
+
+    // 查询总数
+    $countSql = "SELECT COUNT(*) as total FROM travels $whereSql";
+    $totalResult = $conn->query($countSql);
+    $totalNum = $totalResult && $totalResult->num_rows > 0 ? $totalResult->fetch_assoc()['total'] : 0;
+
+    // 返回响应
+    $response = [
+        'status' => 'success',
+        'message' => '获取发布列表成功',
+        'data' => [
+            'list' => $list,
+            'pageNum' => $page,
+            'pageSize' => $count,
+            'totalNum' => $totalNum,
+            'sql' => $sql
+        ],
+        "meta"=> [ "code"=> 2000 ],
+    ];
     echo json_encode($response);
     exit;
 }
@@ -223,22 +361,23 @@ else if (preg_match('/\/mp\/travel\/list\/(\d+)/', $requestUri, $matches)) {
     // 获取查询参数
     $queryParams = [];
     parse_str(parse_url($requestUri, PHP_URL_QUERY), $queryParams);
-
+    $origin = $queryParams['origin'] ?? '';
+    $dest = $queryParams['dest'] ?? '';
     $page = $queryParams['page'] ?? 1;
     $count = $queryParams['count'] ?? 6;
     $offset = ($page - 1) * $count;
-
-
+    $now = date('Y-m-d H:i:s');
     // 根据 $type 执行不同的逻辑
     if ($type == 0) {
         // 处理 /mp/travel/list/0 的逻辑
-        $sql = "SELECT * FROM travels LIMIT $offset, $count";
+        // $sql = "SELECT * FROM travels LIMIT $offset, $count";
+        $sql = "SELECT * FROM travels WHERE time >= '$now' ";
     } else if ($type == 2) {
         // 处理 /mp/travel/list/1 的逻辑
-        $sql = "SELECT * FROM travels WHERE type = 1 LIMIT $offset, $count";
+        $sql = "SELECT * FROM travels WHERE type = 1 AND time >= '$now' ";
     } else if ($type == 1) {
         // 处理 /mp/travel/list/2 的逻辑
-        $sql = "SELECT * FROM travels WHERE type = 2 LIMIT $offset, $count";
+        $sql = "SELECT * FROM travels WHERE type = 2 AND time >= '$now' ";
     } else {
         // 如果 type 不在预期范围内，返回错误
         http_response_code(400);
@@ -250,6 +389,13 @@ else if (preg_match('/\/mp\/travel\/list\/(\d+)/', $requestUri, $matches)) {
         echo json_encode($response);
         exit;
     }
+    if (!empty($origin)) {
+        $sql .= " AND origin LIKE '%$origin%'";
+    }
+    if (!empty($dest)) {
+        $sql .= " AND dest LIKE '%$dest%'";
+    }
+    
     // 查询行程数据
     $result = $conn->query($sql);
 
@@ -325,6 +471,9 @@ else if (preg_match('/\/mp\/travel\/(\d+)/', $requestUri, $matches)) {
                 'returnTime' => $travel['return_time'],
                 'via' => $travel['via'],
                 'remarks' => $travel['remarks']
+            ],
+            'meta' => [
+                'code' => 2000
             ]
         ];
     } else {
@@ -394,7 +543,7 @@ else if (strpos($requestUri, '/mp/travel/add') !== false) {
         $via,
         $remarks
     );
-
+    
     if ($stmt->execute()) {
         // 返回成功响应
         $response = [
@@ -402,6 +551,9 @@ else if (strpos($requestUri, '/mp/travel/add') !== false) {
             'message' => '行程添加成功',
             'data' => [
                 'id' => $stmt->insert_id
+            ],
+            'meta' => [
+                'code' => 2000
             ]
         ];
     } else {

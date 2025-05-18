@@ -65,8 +65,8 @@ export function getRelease (time, type, pageNum, pageSize) {
   return getRequest(`mp/user/release?time=${time === undefined ? '' : time}&type=${type === undefined ? '' : type}&page=${pageNum === undefined ? '' : pageNum}&count=${pageSize === undefined ? '' : pageSize}`)
 }
 
-export function getReleaseCount () {
-  return getRequest('mp/user/release/count')
+export function getReleaseCount (phone) {
+  return postRequest('mp/user/release/count', { phone })
 }
 
 export function deleteRelease (tid) {
